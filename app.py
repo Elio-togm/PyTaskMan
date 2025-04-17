@@ -40,8 +40,12 @@ class TaskTracker:
                                     time.asctime(time.gmtime(time.time()))] 
         return 'Task updated successfully (ID: {})'.format(task_id)
 
-    def delete(self, task_id): #! NOT IMPLEMENTED
-        pass
+    def delete(self, task_id):
+        self.tasks.pop(int(task_id))
+        self.__all_ids__.remove(int(task_id))
+        if self.__lowest_id__ > int(task_id):
+            self.__lowest_id__ = int(task_id)
+        return 'Task deleted successfully (ID: {})'.format(task_id)
 
     def mark_in_progress(self, task_id): #! NOT IMPLEMENTED
         pass
@@ -54,7 +58,7 @@ class TaskTracker:
 
     def list(self, command=None): #! NOT FULLY IMPLEMENTED
         if command == None:
-            return self.tasks # Returns a list of all tasks
+            return dict(sorted(self.tasks.items())) # Returns a list of all tasks
 
     def help(self):
         return self.__help__() # Prints the help message
