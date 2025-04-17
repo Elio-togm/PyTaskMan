@@ -23,6 +23,9 @@ class TaskTracker:
         print("-h, --help: Show this help message and exit\n")
         return("-----------------------------------------------------------------------------\n")
     
+    def __error_handler__(self, *args): # Handles errors if they exist
+        pass
+    
     def add(self, task):
         id = self.__lowest_id__ # Saves the ID of the task for future reference
         self.tasks[self.__lowest_id__] = [task,     # Sets the task, status, creation date, and last modified date of a task to an unused ID
@@ -47,14 +50,20 @@ class TaskTracker:
             self.__lowest_id__ = int(task_id)
         return 'Task deleted successfully (ID: {})'.format(task_id)
 
-    def mark_in_progress(self, task_id): #! NOT IMPLEMENTED
-        pass
+    def mark_in_progress(self, task_id):
+        self.tasks[int(task_id)][1] = "IN PROGRESS"
+        self.tasks[int(task_id)][3] = time.asctime(time.gmtime(time.time()))
+        return 'Task marked in progress successfully (ID: {})'.format(task_id)
 
-    def mark_done(self, task_id): #! NOT IMPLEMENTED
-        pass
+    def mark_done(self, task_id):
+        self.tasks[int(task_id)][1] = "DONE"
+        self.tasks[int(task_id)][3] = time.asctime(time.gmtime(time.time()))
+        return 'Task marked done successfully (ID: {})'.format(task_id)
 
-    def mark_not_done(self, task_id): #! NOT IMPLEMENTED
-        pass
+    def mark_not_done(self, task_id):
+        self.tasks[int(task_id)][1] = "NOT DONE"
+        self.tasks[int(task_id)][3] = time.asctime(time.gmtime(time.time()))
+        return 'Task marked not done successfully (ID: {})'.format(task_id)
 
     def list(self, command=None): #! NOT FULLY IMPLEMENTED
         if command == None:
