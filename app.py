@@ -33,8 +33,12 @@ class TaskTracker:
         self.__lowest_id__ = max(self.__all_ids__) + 1 # Sets the lowest ID to the next available ID
         return "Task added successfully (ID: {})".format(id) # Returns the ID of the task
     
-    def update(self, task_id): #! NOT IMPLEMENTED
-        pass
+    def update(self, task_id, updated_task):
+        self.tasks[int(task_id)] = [updated_task, 
+                                    self.tasks[int(task_id)][1], 
+                                    self.tasks[int(task_id)][2], 
+                                    time.asctime(time.gmtime(time.time()))] 
+        return 'Task updated successfully (ID: {})'.format(task_id)
 
     def delete(self, task_id): #! NOT IMPLEMENTED
         pass
@@ -75,6 +79,9 @@ if __name__ == "__main__":
             sys.exit() # Exits the program
     command_number = 0 # Keeps track of the number of commands the user has entered
     max_command_number = float("inf") # Keeps track of the maximum number of commands the user can enter
+    single_commmands = ['list', 'help', 'quit'] # A list of commands that can be entered without any arguments
+    double_commmands = ['add', 'delete', 'mark_in_progress', 'mark_done', 'mark_not_done'] # A list of commands that can be entered with 2 arguments
+    triple_commmands = ['update'] # A list of commands that can be entered with 3 arguments
 
     while command_number < max_command_number:
         if command_number == 0: # Prints the help message the first time the user starts the program
@@ -90,8 +97,17 @@ if __name__ == "__main__":
         if user_command.strip(' ') == '':
             invalid_command() # Prints an error message for invalid arguments
 
-        elif user_command.strip(' ') in [method[0] for method in methods]: # Checks if the user entered a valid command without extra arguments
-            print(pyTaskMan.__getattribute__(user_command.strip(' '))()) # Calls the method and prints the result
+        command = user_command.split()[0]
+        valid_arguments_command = command in [method[0] for method in methods]
 
-        elif user_command.split()[0] in [method[0] for method in methods]: # Checks if the user entered a valid command with extra arguements
-            print(pyTaskMan.__getattribute__(user_command.split()[0])(" ".join(user_command.split()[1:]))) # Calls the method and prints the result
+        if user_command.strip(' ') in [method[0] for method in methods]: # Checks if the user entered a valid command without extra arguments: list, help, quit
+            print(pyTaskMan.__getattribute__(user_command.strip(' '))()) # Calls the function given by the command
+
+        elif valid_arguments_command and command in double_commmands: # Checks if the user entered a valid command with 2 arguments: add, delete, marks, lists
+            print(pyTaskMan.__getattribute__(command)(" ".join(user_command.split()[1:]))) # Calls the 2-argument function given by the command
+
+        elif valid_arguments_command and command in triple_commmands: # Checks if the user entered a valid command with 3 arguments: update
+            print(pyTaskMan.__getattribute__(command)(user_command.split()[1], " ".join(user_command.split()[2:]))) # Calls the 3-argument function given by the command
+        
+        else:
+            invalid_command()
