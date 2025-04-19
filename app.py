@@ -1,7 +1,7 @@
 import sys, time, os, json
 
-class TaskTracker:
-    def __init__(self, tasks={}):
+class PyTaskMan:
+    def __init__(self, tasks={}): #* Free of bugs(I HOPE) :D
         self.tasks = tasks # ID: [Task, Status, Creation_Date, Last_Modified]
 
         # Properly sets up the dictionary to have the ID be a integer and not a string
@@ -20,14 +20,14 @@ class TaskTracker:
         
         
     # Sets the lowest ID to the next available ID; Avaliable IDs include natural numbers but not 0
-    def __find_lowest_id__(self):
+    def __find_lowest_id__(self): #* Free of bugs(I HOPE) :D
         self.__lowest_id__ = 0
         while self.__lowest_id__ + 1 in self.__all_ids__:
             self.__lowest_id__ += 1
         self.__lowest_id__ += 1
     
     # Shows the help message which includes all available commands
-    def __help__(self): 
+    def __help__(self): #* Free of bugs :D
         print("\n---------------------------------------------------------------------------------------------------------")
         print("\nPyTaskMan: A Task Tracker CLI program written in Python\n")
         print("Commands:")
@@ -43,11 +43,43 @@ class TaskTracker:
         return("--------------------------------------------------------------------------------------------------------\n")
     
     # Error handler
-    def __error_handler__(self, *args): 
-        pass
+    def __error_handler__(self, *args): #* I'll get to you little buddy :(
+        # Checks if the user entered a valid command
+        if user_command.strip(' ') == '':
+            print(self.__invalid_command__()) # Prints an error message for invalid arguments
+
+        try:
+            command = user_command.lower().split()[0]
+            valid_arguments_command = command in [method[0] for method in methods]
+
+            if user_command.lower().strip(' ') in [method[0] for method in methods]: # Checks if the user entered a valid command without extra arguments: list, help, quit
+                print(self.__getattribute__(user_command.lower().strip(' '))()) # Calls the function given by the command
+
+            elif valid_arguments_command and command in double_commmands: # Checks if the user entered a valid command with 2 arguments: add, delete, marks, lists
+                print(self.__getattribute__(command)(" ".join(user_command.split()[1:]))) # Calls the 2-argument function given by the command
+
+            elif valid_arguments_command and command in triple_commmands: # Checks if the user entered a valid command with 3 arguments: update
+                print(self.__getattribute__(command)(user_command.split()[1], " ".join(user_command.split()[2:]))) # Calls the 3-argument function given by the command
+            
+            else:
+                print(self.__invalid_command__())
+        
+        except TypeError as e:
+            print("\nError: Function is missing positional arguments.") # Prints the error message
+            print(self.__invalid_command__())
+        except ValueError as e:
+            print("\nError: task_id isn't given as an integer.") # Prints the error message
+            print(self.__invalid_command__()) 
+        except KeyError as e:
+            print("\nError: invalid ID(ID doesn't exist in the recorded tasks).") # Prints the error message
+            print(self.__invalid_command__()) 
+
+    def __invalid_command__(self): #* Free of bugs :D
+        print("\nINVALID COMMAND\n") 
+        return "For help, use the 'help' command\n"
     
     # Adds a new task and assigns it an ID
-    def add(self, task):
+    def add(self, task): #* Free of bugs(I HOPE) :D
         id = self.__lowest_id__ # Saves the ID of the task for future reference
         self.tasks[self.__lowest_id__] = [task,     # Sets the task, status, creation date, and last modified date of a task to an unused ID
                                           "NOT DONE", 
@@ -58,7 +90,7 @@ class TaskTracker:
         return "Task added successfully (ID: {})".format(id) # Returns the ID of the task
     
     # Updates a task description
-    def update(self, task_id, updated_task):
+    def update(self, task_id, updated_task): #* Free of bugs(I HOPE) :D
         self.tasks[int(task_id)] = [updated_task, 
                                     self.tasks[int(task_id)][1], 
                                     self.tasks[int(task_id)][2], 
@@ -66,7 +98,19 @@ class TaskTracker:
         return 'Task updated successfully (ID: {})'.format(task_id)
 
     # Deletes a task
-    def delete(self, task_id):
+    def delete(self, task_id): #* Free of bugs(I HOPE) :D
+
+
+        # If the user wants to delete multiple tasks at once, maybe add support for a list of space separated IDs
+
+        # If the user wants to delete all tasks
+        if task_id.lower() == "all" or task_id.lower() == "a":
+            self.tasks = {}
+            self.__all_ids__ = [0]
+            self.__lowest_id__ = 1
+            return 'All tasks deleted successfully'
+        
+        # If the user wants to delete a specific task
         task_id = int(task_id)
         self.tasks.pop(task_id)
         self.__all_ids__.remove(task_id)
@@ -75,7 +119,8 @@ class TaskTracker:
         return 'Task deleted successfully (ID: {})'.format(task_id)
     
     # Marks a task as one of three statuses: TODO, IN PROGRESS, or DONE
-    def mark(self, command, task_id):
+    def mark(self, task_id, command): #* Free of bugs(I HOPE) :D
+
         if command.upper() == 'NOT_DONE' or command.upper() == 'N' or command.upper() == 'ND' or command.upper() == 'NOT DONE'\
             or command.upper() == 'TODO' or command.upper() == 'T' or command.upper() == 'TODO':
             return self.mark_todo(task_id) # Marks a task as not done
@@ -86,6 +131,8 @@ class TaskTracker:
         
         elif command.upper() == 'DONE' or command.upper() == 'D':
             return self.mark_done(task_id) # Marks a task as done
+        
+        return(self.__invalid_command__())
 
     def mark_in_progress(self, task_id):
         self.tasks[int(task_id)][1] = "IN PROGRESS"
@@ -103,53 +150,65 @@ class TaskTracker:
         return 'Task marked not done successfully (ID: {})'.format(task_id)
     
     # Returns a list of all tasks, or a list of all tasks with a specific status
-    def list(self, command=None):
+    def list(self, command=None): #* Free of bugs(I HOPE) :D
+
+        # Returns a list of all tasks
         if command == None:
-            return dict(sorted(self.tasks.items())) # Returns a list of all tasks
+            print("Recorded Tasks:")
+            return dict(sorted(self.tasks.items()))
         
+        # Returns a list of all tasks that are not done
         elif command.upper() == "TODO" or command.upper() == "NOT DONE" or command.upper() == "T" or command.upper() == "N":
-            return dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "NOT DONE"}.items())) # Returns a list of all tasks that are not done
+            print("Recorded Tasks(TODO):")
+            return dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "NOT DONE"}.items()))
         
+        # Returns a list of all tasks that are in progress
         elif command.upper() == "IN PROGRESS" or command.upper() == "I" or command.upper() == "IP" or command.upper() == "P" \
             or command.upper() == "DOING" or command.upper() == "DO":
-            return dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "IN PROGRESS"}.items())) # Returns a list of all tasks that are in progress
+            print("Recorded Tasks(In Progress):")
+            return dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "IN PROGRESS"}.items())) 
         
+        # Returns a list of all tasks that are done
         elif command.upper() == "DONE" or command.upper() == "D":
-            return dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "DONE"}.items())) # Returns a list of all tasks that are done
+            print("Recorded Tasks(Done):")
+            return dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "DONE"}.items())) 
+        
+        return(self.__invalid_command__())
 
     # Prints the help message
-    def help(self):
+    def help(self): #* Free of bugs :D
         return self.__help__() 
 
     # Quits the program
-    def quit(self):
+    def quit(self): #* Free of bugs (I HOPE):D
         self.tasks = dict(sorted(self.tasks.items())) # Organizes the tasks by ID before saving task data
         with open("taskData.json", "w") as f: # Opens the tasks.json file in write mode
             json.dump(self.tasks, f)
         sys.exit()
 
 # Prints an error message for invalid arguments
-def invalid_command():
+def invalid_argument(): #* Free of bugs :D
     print("\nINVALID ARGUMENT\n") 
-    print("For help, use the '-h' or '--help' flag\n") # Prints instructions for using the '-h' or '--help' flag
+    return("For help, use the '-h' or '--help' flag\n") # Prints instructions for using the '-h' or '--help' flag
 
 
 if __name__ == "__main__":
     if os.path.exists("taskData.json"): # Checks if the tasks.json file exists
         with open("taskData.json", "r") as f: # Opens the tasks.json file in read mode
-            pyTaskMan = TaskTracker(json.load(f)) # Creates an instance of the TaskTracker class to begin tracking tasks
+            pyTaskMan = PyTaskMan(json.load(f)) # Creates an instance of the PyTaskMan class to begin tracking tasks
     else:
         with open("taskData.json", "w") as f: # Opens the tasks.json file in write mode
             json.dump({}, f)
-        pyTaskMan = TaskTracker() # Creates an instance of the TaskTracker class to begin tracking tasks
+        pyTaskMan = PyTaskMan() # Creates an instance of the PyTaskMan class to begin tracking tasks
 
     if len(sys.argv) > 1: # Checks if the user provided any optional arguments
         if sys.argv[1] == "-h" or sys.argv[1] == "--help": # Checks if the user provided the '-h' or '--help' flag
             print(pyTaskMan.help()) # Prints the help message
             pyTaskMan.quit() # Exits the program
         else:
-            invalid_command() # Prints an error message for invalid arguments
+            invalid_argument() # Prints an error message for invalid arguments
             pyTaskMan.quit() # Exits the program
+
     command_number = 0 # Keeps track of the number of commands the user has entered
     max_command_number = float("inf") # Keeps track of the maximum number of commands the user can enter
     single_commmands = ['list', 'help', 'quit'] # A list of commands that can be entered without any arguments
@@ -163,24 +222,8 @@ if __name__ == "__main__":
 
         # Asks the user for a command
         user_command = input("PyTaskMan> ")
-        # Gets all callable methods from the TaskTracker class
+        # Gets all callable methods from the PyTaskMan class
         methods = [(func, getattr(pyTaskMan, func)) for func in dir(pyTaskMan) if not func.startswith("_")]
 
         # Checks if the user entered a valid command
-        if user_command.strip(' ') == '':
-            invalid_command() # Prints an error message for invalid arguments
-
-        command = user_command.lower().split()[0]
-        valid_arguments_command = command in [method[0] for method in methods]
-
-        if user_command.lower().strip(' ') in [method[0] for method in methods]: # Checks if the user entered a valid command without extra arguments: list, help, quit
-            print(pyTaskMan.__getattribute__(user_command.lower().strip(' '))()) # Calls the function given by the command
-
-        elif valid_arguments_command and command in double_commmands: # Checks if the user entered a valid command with 2 arguments: add, delete, marks, lists
-            print(pyTaskMan.__getattribute__(command)(" ".join(user_command.split()[1:]))) # Calls the 2-argument function given by the command
-
-        elif valid_arguments_command and command in triple_commmands: # Checks if the user entered a valid command with 3 arguments: update
-            print(pyTaskMan.__getattribute__(command)(user_command.split()[1], " ".join(user_command.split()[2:]))) # Calls the 3-argument function given by the command
-        
-        else:
-            invalid_command()
+        pyTaskMan.__error_handler__()
