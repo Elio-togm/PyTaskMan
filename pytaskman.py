@@ -18,7 +18,7 @@ Commands:
     add (name of task): Adds a task and returns its ID
     update (task_id) 'updated task': Updates a task
     delete (task_id): Deletes a task
-    mark (status: todo, doing, done) (task_id): Marks a task as TODO, IN PROGRESS, or DONE
+    mark (task_id) (status: todo, doing, done): Marks a task as TODO, IN PROGRESS, or DONE
     list (optional: status): Lists all tasks(if a status is provided, lists only tasks with that status)
     help: Shows this help message
     quit: Quits the program
@@ -160,8 +160,9 @@ Optional Arguments (Only on startup of the program):
 
         # Returns a list of all tasks
         if command == None:
-            print("\nRecorded Tasks:")
-            return str(dict(sorted(self.tasks.items()))) + "\n"
+            print("\nAll Tasks:")
+            self.tasks = dict(sorted(self.tasks.items()))
+            return '\n'.join(f'[{key}] {value[0]} - Status: {value[1]}' for key, value in self.tasks.items())+"\n"
         
         command = command.upper().strip(' ')
         valid_commands = {
@@ -184,16 +185,19 @@ Optional Arguments (Only on startup of the program):
         return valid_commands.get(command, self.__invalid_command__)()
     
     def list_todo(self):
-        print("\nRecorded Tasks(TODO):")
-        return str(dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "NOT DONE"}.items()))) + "\n"
+        print("\nTasks [TODO]:")
+        tasks = dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "NOT DONE"}.items()))
+        return '\n'.join(f'[{key}] {value[0]} - Status: {value[1]}' for key, value in tasks.items()) + "\n"
     
     def list_in_progress(self):
-        print("\nRecorded Tasks(In Progress):")
-        return str(dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "IN PROGRESS"}.items()))) + "\n"
+        print("\nTasks [In Progress]:")
+        tasks = dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "IN PROGRESS"}.items()))
+        return '\n'.join(f'[{key}] {value[0]} - Status: {value[1]}' for key, value in tasks.items()) + "\n"
     
     def list_done(self):
-        print("\nRecorded Tasks(Done):")
-        return str(dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "DONE"}.items()))) + "\n"
+        print("\nTasks [Done]:")
+        tasks = dict(sorted({key: value for key, value in self.tasks.items() if value[1] == "DONE"}.items()))
+        return '\n'.join(f'[{key}] {value[0]} - Status: {value[1]}' for key, value in tasks.items()) + "\n"
 
     # Prints the help message
     def help(self):
